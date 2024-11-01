@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chicken Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            color: #eaeaea;
+            margin: 0;
+            padding: 0 10px;
+        }
+        h1 {
+            margin-bottom: 10px;
+            color: #66ff66;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.6);
+            font-size: 2em;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #999;
+            font-weight: 400;
+        }
+        button {
+            padding: 12px 20px;
+            background-color: #333;
+            color: #66ff66;
+            border: 2px solid #66ff66;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #444;
+            transform: translateY(-3px);
+        }
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1;
+            margin-top: 20px;
+            gap: 0;
+            padding: 0;
+        }
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #333;
+            border: 1px solid #222;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .cell img {
+            max-width: 60%;
+            max-height: 60%;
+        }
+        .safe {
+            background-color: #1f8a1f;
+            border: 2px solid #66ff66;
+        }
+        .loss {
+            background-color: #4d1f1f;
+            border: 2px solid #ff4d4d;
+        }
+
+        /* Styles pour les petits écrans */
+        @media (max-width: 500px) {
+            #grid {
+                grid-template-columns: repeat(5, 1fr);
+                max-width: 100%;
+            }
+            .cell {
+                height: 100%;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px 16px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Chicken Predictor</h1>
+    <h2>Made By Krysha</h2>
+    <button onclick="predict()">Load Prediction</button>
+    <div id="grid"></div>
+
+    <script>
+        let lossCount = 0;
+        let recentResults = [];
+
+        function monteCarloSimulations(simulations) {
+            let wins = 0;
+            for (let i = 0; i < simulations; i++) {
+                if (Math.random() < 0.92) {
+                    wins++;
+                }
+            }
+            return wins / simulations;
+        }
+
+        function generateGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            const safeCells = 4;
+            const totalCells = 25;
+            const lossCells = totalCells - safeCells;
+
+            const cells = Array(safeCells).fill('safe').concat(Array(lossCells).fill('loss'));
+            shuffleArray(cells);
+
+            cells.forEach(cellType => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'cell ' + cellType;
+
+                const img = document.createElement('img');
+                if (cellType === 'safe') {
+                    img.src = 'https://media.discordapp.net/attachments/1295388495417704468/1301714248589770752/IMG_7912-removebg-preview.png?ex=67257b5d&is=672429dd&hm=19c82a422842fb5bbc3fc21a190180b173f291e83f10b25bc297e59a2922dba2&';
+                    img.alt = 'Chicken';
+                } else {
+                    img.src = 'https://media.discordapp.net/attachments/1295388495417704468/1301714299445841930/IMG_7913-removebg-preview.png?ex=67257b69&is=672429e9&hm=e3a6e4d9f095bd0679f6595ef70d6e4f6cd39b857939972d35788d014979b745&';
+                    img.alt = 'Bone';
+                }
+
+                cellDiv.appendChild(img);
+                grid.appendChild(cellDiv);
+            });
+
+            updateRecentResults(cells);
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function updateRecentResults(cells) {
+            const result = cells.includes('loss') ? 'loss' : 'win';
+            recentResults.push(result);
+            if (result === 'loss') {
+                lossCount++;
+            } else {
+                lossCount = 0;
+            }
+
+            if (lossCount >= 4) {
+                alert("Alerte : attention. I don't trust this prediction! You can cash out, but you don't have to trust an AI.");
+                lossCount = 0;
+            }
+        }
+
+        function predict() {
+            const simulations = 100000000;
+            const predictionAccuracy = monteCarloSimulations(simulations);
+            console.log(`Précision de prédiction: ${predictionAccuracy * 100}%`);
+
+            generateGrid();
+        }
+    </script>
+</body>
+</html>
